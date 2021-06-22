@@ -1,19 +1,19 @@
 <template>
   <div class="nav-link">
     <a  class="nav-link disabled" href="#" >{{userName}},你好</a>
-    <router-link to="/">首頁</router-link> | <router-link to="/products">產品列表</router-link>|
-    <router-link to="/carts">購物車列表</router-link>|
-    <router-link to="/orders">訂單列表</router-link>|
+    <router-link to="/admin">後台首頁</router-link> |
+    <router-link to="/productsControl">產品管理列表</router-link>|
+    <router-link to="/coupons">優惠券列表</router-link>|
+    <router-link to="/ordersList">訂單列表</router-link>|
     <a  href="#" v-if="loginStatus" @click.prevent="openiSgnOutUserModal">登出</a>
     <router-link v-else to="/Login">登入</router-link>|
-    <router-link to="/admin">後台</router-link>
+    <router-link to="/">前台</router-link>
     <router-view />
-  </div>
+
    <!-- 登出Modal -->
   <LoginOut ref="signOutUserModal" @sign-out-admin="signOutAdmin"></LoginOut>
-
+  </div>
 </template>
-
 <script>
 import LoginOut from '@/components/LoginOut.vue';
 
@@ -28,20 +28,18 @@ export default {
       userName: '訪客',
       // 登入/登出鈕
       loginStatus: false,
-      // 讀取狀態
-      loadingStatue: {
-        // 查看內容鈕
-        viewContentStatus: '',
-        // 加到購物車鈕
-        addCart: '',
-      },
+      // 取得token
+      token: document.cookie.replace(/(?:(?:^|.*;\s*)hexToken\s*=\s*([^;]*).*$)|^.*$/, '$1'),
+      // 登入狀態
+      checkSuccess: '',
     };
   },
   methods: {
     // 登出
     signOutAdmin() {
+      const url = `${process.env.VUE_APP_API}/logout`;
       this.$http
-        .post(`${process.env.VUE_APP_API}/logout`)
+        .post(url)
         .then((res) => {
           // console.log(res);
           // 如果成功就執行
@@ -50,6 +48,7 @@ export default {
 
             // 刪除cookie
             this.deleteAllCookies();
+            // document.cookie = 'hexToken=;expires=;';
             // 跳轉頁面
             this.$router.push('/Login');
           } else {
@@ -94,10 +93,36 @@ export default {
         this.loginStatus = false;
       }
     },
+    // 驗證登入
+    chkLogin() {
+      const url = `${process.env.VUE_APP_API}/api/user/check`;
+      this.$http.post(url)
+        .then(
+          (res) => {
+            console.log(res);
+            if (res.data.success === true) {
+              this.checkSuccess = true;
+            } else {
+              alert('您尚未登入!');
+              // 跳轉頁面
+              this.$router.push('/login');
+            }
+          },
+        )
+        .catch(
+          (err) => {
+            console.log(err);
+          },
+        );
+    },
   },
   created() {
+    // 使用token驗證
+    this.$http.defaults.headers.common.Authorization = this.token;
     // 判斷使用者值
     this.chkUserName();
+    // 判斷是否登入
+    this.chkLogin();
   },
 };
 </script>
