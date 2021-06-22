@@ -1,4 +1,8 @@
 # vue3mission6-vue
+gitPage : https://dstsidragon.github.io/Vue3Mission6-Vue-Router-Vue-Cli/#/
+
+hub: 
+https://github.com/dstsidragon/Vue3Mission6-Vue-Router-Vue-Cli/tree/main
 
 ## Project setup
 ```
